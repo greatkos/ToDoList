@@ -1,0 +1,49 @@
+jQuery实战：快速实现一个在线To-do List应用
+
+内容：开发思路
+清单应用的整体布局
+清单布局的细节完善
+清单应用的需求及逻辑梳理
+清单应用的架构方式
+清单应用的数据存储方式
+模板的实现及应用
+
+本项目目标
+jQuery
+主要对jQueryAPI选择器,方法等进行一个深入理解，
+
+
+第三方插件
+
+通过store.js实现数据的保存
+通过datetimepicker插件实现日期的选择
+
+总结：通过本次项目实现了对jQuery的基本掌握，并了解到企业级开发中的一些代码规范格式潜规则。
+
+
+
+
+https://www.bootcdn.cn/ 开源项目库---都是免费的
+
+1.初始化样式 normalize.css
+
+如果想要datetimepicker日期插件需要引两个插件 （样式和js---如下所示）
+2. jquery.datetimepicker.min.css
+3.jquery.datetimepicker.full.js
+4. store.js---相当于一个前端的数据库
+若想在前端存储:
+Localstorage:数据存储在本地
+Sessionstorage：数据存储在session中
+
+
+https://www.npmjs.com/package/storejs  ----数据库api文档
+
+犀牛书和红宝书
+
+
+本次项目需求:
+
+1.提交数据功能
+2.日期选择器
+3.提交后在列表中回显新修改的数据
+4.删除当前所选择的数据（不用实现批量删除）

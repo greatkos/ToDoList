@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ToDoList</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/jquery.datetimepicker.min.css">
+</head>
+<body>
+    <div class="wrap">
+        <h1>MyToDo</h1>
+        <input type="text">
+        <button>submit</button>
+        <ul>
+            <!-- <li class="clearfix">
+                <input type="checkbox">
+                <i>哈哈哈</i> -->
+                <!-- 本来文字可以不用标签的，
+                但是因为涉及到文字的设置和读取，
+                加标签方便读取信息 -->
+                <!-- <span href="#">删除</span>
+                <span href="#">详情</span>
+            </li>
+            <li class="clearfix">
+                <input type="checkbox">
+                <i>哈哈哈</i>
+                <span href="#">删除</span>
+                <span href="#">详情</span>
+            </li> -->
+        </ul>
+        <div class="set">
+            <input type="text">
+            备注
+            <textarea name="" id="" cols="30" rows="10"></textarea>
+            设置闹钟
+            <input type="text" id="datetimepicker">
+            <button>提交</button>
+        </div>
+    </div>
+
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/jquery.datetimepicker.full.js"></script>
+    <script>
+        $('#datetimepicker').datetimepicker();
+        var model=(function(){
+            //store.clear();
+            //初始化变量
+            var $ul,$ipt,$btn,$set;
+
+            var idx;//现有的li的数目
+            var index;//记录某个li的临时变量
+            var LiArr;//进行存储的数组对象
+
+            //对jq对象进行初始化
+            var jqinit=function(){
+                $ul=$('.wrap ul');
+                $ipt=$('.wrap>input');
+                $btn=$('.wrap>button');
+                $set=$('.wrap .set');
+            }
+            //获取信息
+            var render_list=function(){
+                $ul.html();
+                idx=store.get('idx');
+                LiArr=store.get('LiArr');
+                console.log(index);
+                console.log(LiArr);
+                if(idx==undefined){
+                    idx=0;
+                }
+                if(LiArr==undefined){
+                    LiArr=[];
+                }else{
+                    //如果以前有信息，进行恢复
+                    for(var i=0;i<idx;i++){
+                        var newli=$('<li class="clearfix"><input type="checkbox"><i></i><span href="#">删除</span><span href="#">详情</span></li>');
+                        $('.wrap ul').prepend(newli);
+                        newli.find('i').html(LiArr[i].html);
+                        newli.attr('index',i);//编号--->该是数字千万不要加'',不然就会变成字符串类型的数字
+                        $('.wrap>input').val('');//清除输入栏内历史消息
+                    }
+                }
+            }
+            //储存信息，方便下次使用
+            var store_list=function(){
+                store.set('LiArr',LiArr);
+                store.set('idx',idx);
+            }
+            //点击submit增加li
+            var addli=function(){
+                $btn.click(function(){
+                    var value=$ipt.val();
+                    console.log(value);
+                    if(value==''){
+                        alert('请输入内容！');
+                    }
+                    else{
+                        //在页面中增加li
+                        var newli=$('<li class="clearfix"><input type="checkbox"><i></i><span href="#">删除</span><span href="#">详情</span></li>');
+                        $ul.prepend(newli);
+                        newli.find('i').html(value);//备忘录内容
+                        newli.attr('index',idx);
+                        $ipt.val('');
+                        //创建Li对象
+                        LiArr[idx]=new Li(newli);
+                        //改变idx
+                        idx++;
+                        clickxq();
+                        dlt();
+                        store_list();
+                    }
+                })
+
+            }
+            //点击详情的效果
+            var clickxq=function(){
+                for(var i=0;i<idx;i++){
+                    $ul.find('li').eq(i).find('span').last().click(function(){
+                        $set.show();
+                        index=Number($(this).parent().attr('index'));//index属性出来不是数字是字符串
+                        $set.find('input').first().val(LiArr[index].html);
+                        $set.find('textarea').val(LiArr[index].textarea);
+                        $set.find('input').last().val(LiArr[index].time);
+                        //要读取textarea的文本内容，必须要用val
+                        //text、和html都试过，很不好使
+                    })
+                }
+                //点提交消失 
+                $set.find('button').click(function(){
+                    //把新增加的内容存起来
+                    LiArr[index].textarea=$set.find('textarea').val();
+                    LiArr[index].html=$set.find('input').first().val();
+                    LiArr[index].time=$set.find("input").last().val();
+                    console.log(LiArr[index].time);
+                    //改变页面上备忘录的内容
+                    $ul.find('li').eq(idx-1-index).find('i').html(LiArr[index].html);
+                    $set.hide();
+                    //console.log(LiArr);
+                    store_list();
+                })
+                
+            }
+            //点击删除的效果
+            var dlt=function(){
+                for(var i=0;i<idx;i++){
+                    $ul.find('li').eq(i).find('span').first().click(function(){
+                        $(this).parent().remove();
+                        idx--;
+                        //修正index
+                        for(var q=0;q<idx;q++){
+                            console.log("idx="+idx);
+                            $ul.find('li').eq(q).attr('index',idx-1-q);
+                        }
+                        //其实可以写一个方法，专门用来把LiArr的信息渲染到页面上，这样很多地方都可以更简单
+                        //修正LiArr
+                        LiArr=[];
+                        for(var q=0;q<idx;q++){
+                            LiArr[idx-1-q]=new Li($ul.find('li').eq(q));
+                        }
+                        console.log(LiArr);
+                        store_list();
+                    })
+                    break;
+                }
+            }
+            //将初始化的页面都放在initModule方法里
+            var modelinit=function(){
+                jqinit();
+                $set.hide();//注意在初始化后在用
+                render_list();
+                console.log(idx);
+                console.log(LiArr);
+                addli();
+                clickxq();
+                dlt();
+                store_list();
+            }
+            //建立Li对象:一个li用一个json对象来存
+            function Li(node){
+                this.html=node.find('i').html();//便签内容
+                this.index=idx;//有用？
+                this.textarea=$('.wrap .set textarea').val();
+                this.time=$('.set input').last().val();
+            }
+            return{
+                modelinit:modelinit
+            }
+        })()
+        
+        $(function(){
+            model.modelinit();
+        })
+    </script>
+</body>
+</html>
